@@ -17,4 +17,4 @@ console.log(ascii.stringAt(greeting));  // -> '#Bf&'
 
 ## More examples
 
-  npm test
+`npm test`
