@@ -6,7 +6,8 @@ describe 'ConvertableString', () ->
   ascii = new ConvertableString()
   en = new ConvertableString(97, 26)
 
-  greeting = en.positionOf 'hello'
+  en.string = 'hello'
+  greeting = en.position
 
   context 'Initialize', () ->
 
@@ -23,41 +24,57 @@ describe 'ConvertableString', () ->
         assert.equal en.ALPHABET, enLowerLetters
         done()
 
-  context 'Methods', () ->
+  context 'Properties', () ->
 
-    describe 'ascii.positionOf(string: string)', () ->
-      it "should return position of the [string]", (done) ->
-        assert.equal ascii.positionOf('#'), 4
+    describe 'ascii.position of ascii.string: string', () ->
+      it "should return position of the [ascii.string]", (done) ->
+        ascii.string = '#';
+        assert.equal ascii.position, 4
         done()
 
-    describe 'ascii.codesIn(string: string)', () ->
-      it "should return char codes of the [string] letters", (done) ->
-        assert.deepEqual ascii.codesIn('hello'), [ 73, 70, 77, 77, 80 ]
+    describe 'ascii.codes in ascii.string: string', () ->
+      it "should return char codes of the [ascii.string] letters", (done) ->
+        ascii.string = 'hello';
+        assert.deepEqual ascii.codes, [ 73, 70, 77, 77, 80 ]
         done()
 
-    describe 'ascii.stringAt(position: integer)', () ->
-      it "should return string at the [position]", (done) ->
-        assert.equal ascii.stringAt(7), '&'
+    describe 'ascii.string at ascii.position: integer', () ->
+      it "should return string at the [ascii.position]", (done) ->
+        ascii.position = 7;
+        assert.equal ascii.string, '&'
         done()
 
-    describe 'ascii.stringBy(codes: array)', () ->
-      it "should return string by [char codes]", (done) ->
-        assert.equal ascii.stringBy([ 73, 74 ]), 'hi'
+    describe 'ascii.string by ascii.codes: array', () ->
+      it "should return string by [ascii.codes]", (done) ->
+        ascii.codes = [ 73, 74 ];
+        assert.equal ascii.string, 'hi'
+        done()
+
+    describe 'ascii.from(\'hello\')', () ->
+      it "should set ascii.string = \'hello\'", (done) ->
+        ascii.from('hello')
+        assert.equal ascii.string, 'hello'
         done()
 
   context 'Conversion', () ->
 
-    describe 'greeting = en.positionOf(\'hello\')', () ->
-      it "should set english lowercased alphabet position of the word \'hello\'", (done) ->
-        assert.equal en.positionOf('hello'), 3752127
+    describe 'ascii.string by en.position', () ->
+      it "should convert the word from en to ascii by en.position", (done) ->
+        en.string = 'hello'
+        ascii.position = en.position
+        assert.equal ascii.string, '#Bf&'
         done()
 
-    describe 'ascii.stringAt(greeting)', () ->
-      it "should convert the word \'hello\' from en to ascii by position", (done) ->
-        assert.equal ascii.stringAt(greeting), '#Bf&'
+    describe 'en.from(ascii.position)', () ->
+      it "should set en.string by ascii.position", (done) ->
+        ascii.string = '#Bf&'
+        en.from(ascii.position)
+        assert.equal en.string, 'hello'
         done()
 
-    describe 'en.stringAt(ascii.positionOf(\'hello\'))', () ->
-      it "should convert the word \'hello\' from ascii to en", (done) ->
-        assert.equal en.stringAt(ascii.positionOf('hello')), 'sknfwxw'
+    describe 'ascii.from(en)', () ->
+      it "should convert the word from en to ascii", (done) ->
+        en.string = 'hello'
+        ascii.from(en)
+        assert.equal ascii.string, '#Bf&'
         done()

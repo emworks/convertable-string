@@ -1,6 +1,6 @@
 {
   "name": "convertable-string",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Convert string from the one alphabet to another",
   "main": "index.js",
   "scripts": {

@@ -1,15 +1,101 @@
 module.exports = class ConvertableString {
   constructor() {
-    this.ALPHABET = typeof arguments[0] === 'string' && Object.keys(arguments).length === 1
-      ? arguments[0] : this.getAlphabet(arguments);
+    return ((self) => Object.create({
+      from: function(value) {
+        if (!value.string)
+          this[({
+            'string': 'string',
+            'number': 'position',
+            'object': 'codes'
+          })[typeof value]] = value
+        else
+          this.position = value.position;
+        return this.string;
+      }
+    }, {
+      ALPHABET: {
+        value: typeof arguments[0] === 'string' && Object.keys(arguments).length === 1
+          ? arguments[0] : self.getAlphabet(arguments)
+      },
+      string: {
+        get() {
+          return (this._string)
+            ? this._string
+            : (this._position)
+              ? (this.string = self.stringAt.call(this, this._position))
+                && this._string
+              : (this._codes && this._codes.length)
+                ? (this.string = self.stringBy.call(this, this._codes))
+                  && this._string
+                : ''
+        },
+        set(value) {
+          self.setProperties.call(this, { string: ''+value });
+        }
+      },
+      position: {
+        get() {
+          return (this._position)
+            ? this._position
+            : (this._string)
+              ? (this.position = self.positionOf.call(this, this._string))
+                && this._position
+              : (this._codes && this._codes.length)
+                ? (this.position = self.positionOf.call(this,
+                  self.stringBy.call(this, this._codes))) && this._position
+                : 0
+        },
+        set(value) {
+          self.setProperties.call(this, { position: +value });
+        }
+      },
+      codes: {
+        get() {
+          return (this._codes && this._codes.length)
+            ? this._codes
+            : (this._string)
+              ? (this.codes = self.codesIn.call(this, this._string)) && this._codes
+              : (this._position)
+                ? (this._codes = self.codesIn.call(this, self.stringAt.call(this,
+                  this._position))) && this._codes
+                : []
+        },
+        set(value) {
+          self.setProperties.call(this, { codes: [].concat(value) });
+        }
+      }
+    }))(this);
+  }
+
+  setProperties(props) {
+    Object.defineProperties(this, {
+      _string: {
+        value: props.string || '',
+        writable: true,
+        enumerable: false
+      },
+      _position: {
+        value: props.position || 0,
+        writable: true,
+        enumerable: false
+      },
+      _codes: {
+        value: props.codes || [],
+        writable: true,
+        enumerable: false
+      }
+    });
   }
 
   positionOf(string = '') {
-    let codes = this.codesIn(string);
     let exps = Array.from(Array(string.length), (x,i) => i).reverse();
-    return exps.reduce((total, exp, i) =>
-      (total += codes[i] * Math.pow(this.ALPHABET.length, exp)) && total
-    , 0);
+    let code = 0, exp = 0;
+    return string.split('').reduce((total, letter, i) => {
+      code = this.ALPHABET.indexOf(letter) + 1;
+      exp = Math.pow(this.ALPHABET.length, exps[i]);
+      total += code * exp;
+      return total;
+    }, 0);
   }
 
   codesIn(string = '') {
