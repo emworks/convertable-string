@@ -1,15 +1,17 @@
 module.exports = class ConvertableString {
   constructor() {
     return ((self) => Object.create({
-      from: function(value) {
-        if (!value.string)
+      from: function(source) {
+        if (!!~['undefined', 'boolean', 'function'].indexOf(typeof source))
+          throw new Error('Source should be type string, number or object');
+        if (!source.string)
           this[({
             'string': 'string',
             'number': 'position',
             'object': 'codes'
-          })[typeof value]] = value
+          })[typeof source]] = source;
         else
-          this.position = value.position;
+          this.position = source.position;
         return this.string;
       }
     }, {
@@ -19,15 +21,12 @@ module.exports = class ConvertableString {
       },
       string: {
         get() {
-          return (this._string)
-            ? this._string
-            : (this._position)
-              ? (this.string = self.stringAt.call(this, this._position))
-                && this._string
-              : (this._codes && this._codes.length)
-                ? (this.string = self.stringBy.call(this, this._codes))
-                  && this._string
-                : ''
+          if (!(this._string = this._string || ''))
+            if (this._position)
+              this.string = self.stringAt.call(this, this._position);
+            else if (this._codes && this._codes.length)
+              this.string = self.stringBy.call(this, this._codes);
+          return this._string;
         },
         set(value) {
           self.setProperties.call(this, { string: ''+value });
@@ -35,15 +34,13 @@ module.exports = class ConvertableString {
       },
       position: {
         get() {
-          return (this._position)
-            ? this._position
-            : (this._string)
-              ? (this.position = self.positionOf.call(this, this._string))
-                && this._position
-              : (this._codes && this._codes.length)
-                ? (this.position = self.positionOf.call(this,
-                  self.stringBy.call(this, this._codes))) && this._position
-                : 0
+          if (!(this._position = this._position || 0))
+            if (this._string)
+              this.position = self.positionOf.call(this, this._string);
+            else if (this._codes && this._codes.length)
+              this.position = self.positionOf.call(this,
+                self.stringBy.call(this, this._codes));
+          return this._position;
         },
         set(value) {
           self.setProperties.call(this, { position: +value });
@@ -51,14 +48,13 @@ module.exports = class ConvertableString {
       },
       codes: {
         get() {
-          return (this._codes && this._codes.length)
-            ? this._codes
-            : (this._string)
-              ? (this.codes = self.codesIn.call(this, this._string)) && this._codes
-              : (this._position)
-                ? (this._codes = self.codesIn.call(this, self.stringAt.call(this,
-                  this._position))) && this._codes
-                : []
+          if (!(this._codes = this._codes || []).length)
+            if (this._string)
+              this.codes = self.codesIn.call(this, this._string);
+            else if (this._position)
+              this.codes = self.codesIn.call(this, self.stringAt.call(this,
+                this._position));
+          return this._codes;
         },
         set(value) {
           self.setProperties.call(this, { codes: [].concat(value) });
