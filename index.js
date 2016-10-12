@@ -1,3 +1,5 @@
+'use strict';
+
 const ConvertableString = require('./convertable-string');
 
 /*
